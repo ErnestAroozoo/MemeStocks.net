@@ -1,14 +1,6 @@
 # Streamlit for frontend
-
 import streamlit as st
-
-import main
 import yahoo_finance
-import time
-import random
-import plotly.express as px
-import pandas as pd
-import numpy as np
 import reddit_scraper
 
 st.set_page_config(

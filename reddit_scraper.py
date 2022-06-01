@@ -1,8 +1,6 @@
 # PRAW for Reddit API web scraping
-
-import praw
 import datetime
-import main
+import praw
 
 # Declare Reddit information
 reddit = praw.Reddit(client_id='EXQz_JfwBsIDzxPleRVxUg', client_secret='wSRhPRaYmr-uN_htZhnfPwSVJPkTnQ',
