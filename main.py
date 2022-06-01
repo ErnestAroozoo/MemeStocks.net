@@ -11,8 +11,8 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
-        'Get Help': 'https://memestocks.net',
-        'Report a bug': "https://memestocks.net",
+        'Get Help': 'http://memestocks.net',
+        'Report a bug': "http://memestocks.net",
         'About': "MemeStocks.net is a tool that scrapes Reddit for the number of stock mentions"
     }
 )
@@ -76,3 +76,12 @@ with st.spinner("Please wait... Retrieving information from" + " " + "r/" + subr
     # Return error message if stock does not exist
     elif search_input != '' and yahoo_finance.stock_exists(search_input) is False:
         st.error('Error: Invalid stock symbol. Try a valid stock symbol such as "AAPL".')
+
+# Remove Streamlit watermark
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
