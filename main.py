@@ -1,8 +1,8 @@
-# Streamlit for frontend
 import streamlit as st
-import yahoo_finance
 import reddit_scraper
+import yahoo_finance
 
+# Page config
 st.set_page_config(
     page_title="MemeStocks.net",
     page_icon="🧊",
@@ -15,25 +15,46 @@ st.set_page_config(
     }
 )
 
-
-# Display metrics for the chosen stock
-def stock_info():
-    st.metric(label="Stock Name", value=yahoo_finance.get_name(search_input))
-    stock_price = yahoo_finance.get_price(search_input)
-    st.metric(label="Stock Price", value=stock_price)
-    st.metric(label="Today's Number of Mentions", value=reddit_scraper.stock_mentions(str(search_input)))
-
-
 # Title of the web app
 st.title("MemeStocks.net")
 
+
+# Function to display stock information
+def stock_info():
+    progress_bar = st.progress(0)
+    progress_bar.progress(0)
+
+    stock_data = yahoo_finance.get_info(search_input)  # Retrieves dictionary object with info
+
+    stock_name = stock_data['shortName']
+    st.metric(label="Stock Name", value=stock_name)
+    progress_bar.progress(20)
+
+    stock_sector = stock_data['sector']
+    st.metric(label="Sector", value=stock_sector)
+    progress_bar.progress(40)
+
+    stock_country = stock_data['country']
+    st.metric(label="Country", value=stock_country)
+    progress_bar.progress(60)
+
+    stock_price = stock_data['regularMarketPrice']
+    st.metric(label="Stock Price", value=stock_price)
+    progress_bar.progress(80)
+
+    stock_mentions = reddit_scraper.stock_mentions(search_input)
+    st.metric(label="Today's Number of Mentions", value=stock_mentions)
+
+    progress_bar.progress(100)
+
+
 # Search input
 st.header('')
-search_input = st.text_input('Stock Ticker', '', max_chars=10, placeholder='Type a stock ticker (e.g. "AAPL")')
+search_input = st.text_input('Stock Ticker', '', max_chars=10, key=str, placeholder='Type a stock ticker (e.g. "AAPL")')
 
-# Check if inputted stock ticker exists
+# Display information if stock exists
 if search_input != '' and yahoo_finance.stock_exists(search_input) is True:
     stock_info()
+# Return error message if stock does not exist
 elif search_input != '' and yahoo_finance.stock_exists(search_input) is False:
     st.error('Error: Invalid stock symbol. Try a valid stock symbol such as "AAPL".')
-

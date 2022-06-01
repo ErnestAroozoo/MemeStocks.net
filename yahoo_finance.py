@@ -1,5 +1,3 @@
-# PostgreSQL to store data for stock mentions
-
 import yfinance as yf
 
 
@@ -23,3 +21,23 @@ def get_name(stock_ticker):
     ticker = yf.Ticker(str(stock_ticker))
     name = ticker.info['shortName']
     return name
+
+
+# Returns the sector of the stock
+def get_sector(stock_ticker):
+    ticker = yf.Ticker(str(stock_ticker))
+    sector = ticker.info['sector']
+    return sector
+
+
+# Returns the country of the stock
+def get_country(dictionary):
+    country = dictionary['country']
+    return country
+
+
+# Returns dictionary of stock info
+def get_info(stock_ticker):
+    ticker = yf.Ticker(str(stock_ticker))
+    dictionary = ticker.info
+    return dictionary
