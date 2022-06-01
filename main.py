@@ -72,6 +72,13 @@ hide_decoration_bar_style = '''
 '''
 st.markdown(hide_decoration_bar_style, unsafe_allow_html=True)
 
+# Hide anchor link
+st.markdown("""
+    <style>
+    .css-15zrgzn {display: none}
+    </style>
+    """, unsafe_allow_html=True)
+
 # Title of the web app
 st.title("MemeStocks.net")
 
