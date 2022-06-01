@@ -6,8 +6,8 @@ import time
 
 # Page config
 st.set_page_config(
-    page_title="MemeStocks.net",
-    page_icon="🧊",
+    page_title="MemeStocks.net - Stock sentiment analytical tool",
+    page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
@@ -85,3 +85,5 @@ hide_streamlit_style = """
             </style>
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+
