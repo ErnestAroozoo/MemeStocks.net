@@ -4,7 +4,7 @@ import reddit_scraper
 import yahoo_finance
 import time
 
-# Page config
+# CUSTOMIZATION: Page config
 st.set_page_config(
     page_title="MemeStocks.net - Stock sentiment analytical tool",
     page_icon="📈",
@@ -17,16 +17,7 @@ st.set_page_config(
     }
 )
 
-# Remove Streamlit hamburger menu
-hide_streamlit_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: visible;}
-            </style>
-            """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
-# Change Streamlit footer
+# CUSTOMIZATION: Change Streamlit footer
 footer = """<style>
 a:link , a:visited{
 color: blue;
@@ -56,7 +47,16 @@ text-align: center;
 """
 st.markdown(footer, unsafe_allow_html=True)
 
-# Remove Streamlit top margin
+# CUSTOMIZATION: Remove Streamlit hamburger menu
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: visible;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+# CUSTOMIZATION: Remove Streamlit top margin
 hide_streamlit_style = """
 <style>
     #root > div:nth-child(1) > div > div > div > div > section > div {padding-top: 0rem;}
@@ -64,7 +64,7 @@ hide_streamlit_style = """
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-# Remove Streamlit top decoration bar
+# CUSTOMIZATION: Remove Streamlit top decoration bar
 hide_decoration_bar_style = '''
     <style>
         header {visibility: hidden;}
@@ -72,7 +72,7 @@ hide_decoration_bar_style = '''
 '''
 st.markdown(hide_decoration_bar_style, unsafe_allow_html=True)
 
-# Hide anchor link
+# CUSTOMIZATION: Hide anchor link
 st.markdown("""
     <style>
     .css-15zrgzn {display: none}
@@ -83,7 +83,7 @@ st.markdown("""
 st.title("MemeStocks.net")
 
 
-# Function to display stock information
+# FUNCTION: Display stock information
 def stock_info():
     col1, col2 = st.columns(2)
 
@@ -127,7 +127,7 @@ def stock_info():
         progress_bar.empty()
 
 
-# Function to display TradingView chart
+# FUNCTION: Display TradingView chart
 def stock_chart():
     with st.container():
         components.html(
@@ -174,3 +174,33 @@ with st.spinner("Please wait... Retrieving data from" + " " + "r/" + subreddit_i
     # Return error message if stock does not exist
     elif search_input != '' and yahoo_finance.stock_exists(search_input) is False:
         st.error('Error: Invalid stock symbol. Try a valid stock symbol such as "AAPL".')
+
+# CUSTOMIZATION: Change Streamlit footer
+footer = """<style>
+a:link , a:visited{
+color: blue;
+background-color: transparent;
+text-decoration: underline;
+}
+
+a:hover,  a:active {
+color: red;
+background-color: transparent;
+text-decoration: underline;
+}
+
+.footer {
+position: fixed;
+left: 0;
+bottom: 0;
+width: 100%;
+background-color: #212121;
+color: white;
+text-align: center;
+}
+</style>
+<div class="footer">
+<p>Made by Ernest Aroozoo</p>
+</div>
+"""
+st.markdown(footer, unsafe_allow_html=True)
