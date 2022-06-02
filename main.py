@@ -102,28 +102,32 @@ def stock_info():
             st.metric(label="Sector", value=stock_sector)
         except:
             pass
-
-        progress_bar.progress(40)
+        progress_bar.progress(30)
 
         try:
             stock_country = stock_data['country']
             st.metric(label="Country", value=stock_country)
         except:
             pass
+        progress_bar.progress(50)
 
-        progress_bar.progress(60)
-
-    with col2:
-        stock_currency = stock_data['currency']
         stock_price = "$" + str(stock_data['regularMarketPrice'])
         st.metric(label="Stock Price", value=stock_price)
-        progress_bar.progress(80)
+        progress_bar.progress(70)
 
+    with col2:
         stock_mentions = reddit_scraper.stock_mentions(search_input, subreddit_input, 1)
         st.metric(label="Number of Posts (Today)", value=stock_mentions)
+        progress_bar.progress(80)
+
+        stock_mentions3 = reddit_scraper.stock_mentions(search_input, subreddit_input, 3)
+        st.metric(label="Number of Posts (Last 3 Days)", value=stock_mentions3)
+        progress_bar.progress(90)
+
+        stock_mentions7 = reddit_scraper.stock_mentions(search_input, subreddit_input, 7)
+        st.metric(label="Number of Posts (Last 7 Days)", value=stock_mentions7)
 
         progress_bar.progress(100)
-        time.sleep(1)
         progress_bar.empty()
 
 
@@ -162,11 +166,11 @@ def stock_chart():
 
 
 # Search input
-search_input = st.text_input('Stock Ticker', '', max_chars=10, key=str, placeholder='Type a stock ticker (e.g. "AAPL")')
+search_input = st.text_input('Stock Ticker', '', max_chars=5, key=str, placeholder='Type a stock ticker (e.g. "AAPL")')
 subreddit_input = st.selectbox('Subreddit', ('WallStreetBets', 'Stocks', 'Investing'))
 
 # Display information if stock exists
-with st.spinner("Please wait... Retrieving data from" + " " + "r/" + subreddit_input):
+with st.spinner("Please wait... Retrieving data from" + " " + "r/" + subreddit_input + "."):
     if search_input != '' and yahoo_finance.stock_exists(search_input) is True:
         stock_info()
         stock_chart()

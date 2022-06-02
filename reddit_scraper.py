@@ -15,12 +15,16 @@ def stock_mentions(stock_ticker, subreddit, time_range):
     # Whitelisted words to scrape
     whitelist = [stock_ticker.upper(), "$" + stock_ticker.upper()]
     # Search every new post for the whitelisted words
-    for submission in reddit.subreddit(subreddit).new(limit=100):
+    for submission in reddit.subreddit(subreddit).new(limit=1000):
         submission_title = submission.title.upper()
         submission_title_keywords = submission_title.split()
         submission_date = submission.created
-        for word in whitelist:
-            if word in submission_title_keywords and submission_date >= days_ago:
-                mentions = mentions + 1
+        if submission_date >= days_ago:
+            for word in whitelist:
+                if word in submission_title_keywords:
+                    mentions = mentions + 1
+                    print(submission.title)
+        else:
+            print(submission.created)
+            break
     return mentions
-
