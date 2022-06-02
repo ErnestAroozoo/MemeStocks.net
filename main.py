@@ -119,7 +119,7 @@ def stock_info():
         st.metric(label="Stock Price", value=stock_price)
         progress_bar.progress(80)
 
-        stock_mentions = reddit_scraper.stock_mentions(search_input, subreddit_input)
+        stock_mentions = reddit_scraper.stock_mentions(search_input, subreddit_input, 1)
         st.metric(label="Number of Posts (Today)", value=stock_mentions)
 
         progress_bar.progress(100)
