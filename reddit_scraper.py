@@ -43,20 +43,6 @@ def scrape_posts(subreddit_name):
             break
     return posts_list
 
-# FUNCTION: Store historical Reddit posts as a list
-    # Initialize variables
-    posts_list = []  # List used to store the title of all posts within the time range
-    for posts in reddit.subreddit(subreddit_name).new(limit=100000):
-        post_date = datetime.utcfromtimestamp(posts.created).strftime('%Y-%m-%d')  # Retrieve post's date in UTC
-        # Case 1: If the post date is today then add it to the list
-        if post_date == today:
-            posts_list.append(posts.title)
-            print(post_date)
-        # Case 2: If post date is not today meaning we can end loop early
-        else:
-            break
-    return posts_list
-
 
 # FUNCTION: Parse the list of titles for specified keywords and commit to database
 def parse_posts(posts_list):
@@ -91,15 +77,15 @@ def parse_posts(posts_list):
 #             CREATE TABLE public.%s
 #             (
 #                 date date NOT NULL,
-#                 mentions_posts integer NOT NULL,
-#                 posts_data text[] NOT NULL,
-#                 mentions_comments integer NOT NULL,
-#                 comments_data text[] NOT NULL,
+#                 wallstreetbets_posts integer,
+#                 wallstreetbets_posts_data text[],
+#                 wallstreetbets_comments integer,
+#                 wallstreetbets_comments_data text[],
 #                 PRIMARY KEY (date)
 #             );
 #         """
 #         ticker = str(tickers[0])
-#         database_name = ticker.lower() + "_wallstreetbets"
+#         database_name = ticker
 #         sql_code = sql_code % database_name
 #         print(sql_code)
 #         cur.execute(sql_code)
