@@ -17,8 +17,7 @@ con = psycopg2.connect(
 )
 cur = con.cursor()
 db_string = "postgresql://vyodltuwdpfjsh:c4edb887115a1cf4a665e02aba475d16b115154bff6b49615936a38b416bac47@ec2-52-207-15-147.compute-1.amazonaws.com:5432/db02648v92l1c3"
-connection = create_engine(db_string).connect()
-
+connection = create_engine(db_string, pool_size=20, max_overflow=0).connect()
 
 # Stock Tickers CSV Database
 with open('stock_tickers.csv', newline='') as f:
@@ -171,6 +170,7 @@ def stock_info():
             # st.dataframe(data=df_filtered, width=1000)
 
             st.dataframe(data=df, width=1000)
+    con.close()
 
 
 # Title of the web app
