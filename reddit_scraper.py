@@ -1,30 +1,76 @@
 import datetime
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 import praw
+import psycopg2
+import csv
 
+# Heroku PostgreSQL Database
+con = psycopg2.connect(
+    host="ec2-52-207-15-147.compute-1.amazonaws.com",
+    database="db02648v92l1c3",
+    user="vyodltuwdpfjsh",
+    password="c4edb887115a1cf4a665e02aba475d16b115154bff6b49615936a38b416bac47"
+)
+cur = con.cursor()
 
-# Scraping process
-def stock_mentions(stock_ticker, subreddit, time_range):
-    # Declare Reddit Information
+# Stock Tickers CSV Database
+with open('stock_tickers.csv', newline='') as f:
+    reader = csv.reader(f)
+    data = list(reader)
+
+    # Reddit PRAW Client
     reddit = praw.Reddit(client_id='EXQz_JfwBsIDzxPleRVxUg', client_secret='wSRhPRaYmr-uN_htZhnfPwSVJPkTnQ',
                          redirect_uri='https://memestocks.net', user_agent='memestocks_net')
-    # Initialize number of mentions
-    mentions = 0
-    # Initialize time range in unix time
-    days_ago = (datetime.today() - timedelta(days=time_range)).timestamp()
-    # Whitelisted words to scrape
-    whitelist = [stock_ticker.upper(), "$" + stock_ticker.upper()]
-    # Search every new post for the whitelisted words
-    for submission in reddit.subreddit(subreddit).new(limit=1000):
-        submission_title = submission.title.upper()
-        submission_title_keywords = submission_title.split()
-        submission_date = submission.created
-        if submission_date >= days_ago:
-            for word in whitelist:
-                if word in submission_title_keywords:
-                    mentions = mentions + 1
-                    print(submission.title)
+
+# Initialize today's date in YYYY-MM-DD format
+today = datetime.today().utcnow().strftime('%Y-%m-%d')  # Retrieve today's date in UTC
+
+
+# FUNCTION: Store Reddit posts locally for more optimal scraping
+def scrape_posts(subreddit_name):
+    # Initialize variables
+    posts_list = []  # List used to store the title of all posts within the time range
+    for posts in reddit.subreddit(subreddit_name).new(limit=1000):
+        post_date = datetime.utcfromtimestamp(posts.created).strftime('%Y-%m-%d')  # Retrieve post's date in UTC
+        # Case 1: If the post date is today then add it to the list
+        if post_date == today:
+            posts_list.append(posts.title)
+            print(post_date)
+        # Case 2: If post date is not today meaning we can end loop early
         else:
-            print(submission.created)
             break
-    return mentions
+    return posts_list
+
+
+# FUNCTION: Parse the list of titles for specified keywords
+def parse_posts(posts_list):
+    for tickers in data:
+        # Initialize variables
+        ticker = tickers[0]
+        whitelist_keyword1 = ticker.upper()
+        whitelist_keyword2 = '$' + ticker.upper()
+        mentions_posts = 0
+        content = []
+        for titles in posts_list:
+            post_title_keywords = titles.upper().split()
+            # Case 1: Post date is today and keywords are in the title
+            if whitelist_keyword1 in post_title_keywords or whitelist_keyword2 in post_title_keywords:
+                mentions_posts = mentions_posts + 1  # Count number of mentions from posts
+                content.append(titles)  # Append post title into a list
+
+        print("Symbol: " + ticker + " | Mentions: " + str(mentions_posts))
+        print(content)
+        # Insert data into PostgreSQL
+        cur.execute("""
+        INSERT INTO mentions_posts (date, stock_symbol, subreddit, mentions_posts, content)
+        VALUES (%s, %s, %s, %s, %s)
+        """, (today, ticker, 'wallstreetbets', mentions_posts, content))
+    con.commit()
+
+
+if __name__ == "__main__":
+    wallstreetbets_posts_list = scrape_posts('wallstreetbets')  # Retrieve a list of posts from r/wallstreetbets
+    parse_posts(wallstreetbets_posts_list)  # Parse title from r/wallstreetbets for keywords
+    cur.close()
+    con.close()

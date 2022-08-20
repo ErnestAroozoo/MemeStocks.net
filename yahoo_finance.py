@@ -41,11 +41,3 @@ def get_info(stock_ticker):
     ticker = yf.Ticker(str(stock_ticker))
     dictionary = ticker.info
     return dictionary
-
-
-test_ticker = yf.Ticker("AAaPL")
-print(test_ticker.info)
-if test_ticker.info['regularMarketPrice'] is None:
-    print("Does not exist")
-else:
-    print("Exists")
