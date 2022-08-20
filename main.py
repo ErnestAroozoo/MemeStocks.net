@@ -6,6 +6,7 @@ import yahoo_finance
 import time
 import csv
 import pandas as pd
+from sqlalchemy import create_engine
 
 # Heroku PostgreSQL Database
 con = psycopg2.connect(
@@ -15,6 +16,9 @@ con = psycopg2.connect(
     password="c4edb887115a1cf4a665e02aba475d16b115154bff6b49615936a38b416bac47"
 )
 cur = con.cursor()
+db_string = "postgresql://vyodltuwdpfjsh:c4edb887115a1cf4a665e02aba475d16b115154bff6b49615936a38b416bac47@ec2-52-207-15-147.compute-1.amazonaws.com:5432/db02648v92l1c3"
+connection = create_engine(db_string).connect()
+
 
 # Stock Tickers CSV Database
 with open('stock_tickers.csv', newline='') as f:
@@ -99,49 +103,6 @@ st.markdown(hide_anchor_style, unsafe_allow_html=True)
 # FUNCTION: Display stock information
 def stock_info():
     st.subheader('Information')
-    # stock_data = yahoo_finance.get_info(search_input.upper())  # Retrieves dictionary object with info
-    #
-    # st.subheader('Information')
-    #
-    # # Initialize variables to retrieve information on stocks from Yahoo Finance
-    # try:
-    #     stock_name = stock_data['shortName']
-    # except:
-    #     stock_name = "N/A"
-    #
-    # try:
-    #     stock_sector = stock_data['sector']
-    # except:
-    #     stock_sector = "N/A"
-    #
-    # try:
-    #     stock_country = stock_data['country']
-    # except:
-    #     stock_country = "N/A"
-    #
-    # try:
-    #     stock_price = "$" + str(stock_data['regularMarketPrice'])
-    # except:
-    #     stock_price = "N/A"
-    #
-    # # Create columns for section 1
-    # col1, col2, col3, col4 = st.columns(4)
-    #
-    # with col1:
-    #     st.metric(label="Name", value=stock_name)
-    #     progress_bar.progress(30)
-    #
-    # with col2:
-    #     st.metric(label="Sector", value=stock_sector)
-    #     progress_bar.progress(50)
-    #
-    # with col3:
-    #     st.metric(label="Country", value=stock_country)
-    #     progress_bar.progress(70)
-    #
-    # with col4:
-    #     st.metric(label="Price", value=stock_price)
-    #     progress_bar.progress(80)
 
     # Create columns for section 1
     whitelist_index = -1
@@ -199,16 +160,9 @@ def stock_info():
 
         with col6:
             st.subheader('Mentions Data')
-            # Retrieve data from PostgreSQL
-            sql_code = "SELECT * FROM %s"
-            database_name = search_input.lower() + "_" + subreddit_input.lower()
-            sql_code = sql_code % database_name
-            print(sql_code)
-            cur.execute(sql_code)
-            rows = cur.fetchall()
+            database_name = search_input.lower()
             # Create Pandas object
-            df = pd.DataFrame(rows, columns=['Date', 'Mentions (Posts)', 'Post Titles', 'Mentions (Comments)',
-                                             'Comments'])
+            df = pd.read_sql_table(database_name, connection)
 
             # df_filter = df['Stock Symbol'] == search_input.upper()
             # df_filtered = df[df_filter]
@@ -227,14 +181,13 @@ search_input = st.text_input('Stock Symbol', '', max_chars=5, key=str,
                              placeholder="Type a stock symbol and then press enter (e.g. GME)")
 subreddit_input = st.selectbox('Subreddit', ['WallStreetBets'])
 
-# Display information if stock exists
-with st.spinner("Please wait... Retrieving data from" + " " + "r/" + subreddit_input + "."):
-    if search_input.upper() != '' and search_input.upper() in whitelist:
-        stock_info()
+# Case 1: Display information if stock exists
+if search_input.upper() != '' and search_input.upper() in whitelist:
+    stock_info()
 
-    # Return error message if stock does not exist
-    elif search_input.upper() != '' and search_input.upper() not in whitelist:
-        st.error("Error: Invalid stock symbol. Please type a valid stock symbol such as AAPL.")
+# Case 2: Return error message if stock does not exist
+elif search_input.upper() != '' and search_input.upper() not in whitelist:
+    st.error("Error: Invalid stock symbol. Please type a valid stock symbol such as AAPL.")
 
 # CUSTOMIZATION: Change Streamlit footer again to prevent clipping
 add_footer_style2 = """<style>
