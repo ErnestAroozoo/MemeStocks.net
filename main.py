@@ -209,8 +209,6 @@ with st.spinner("Please wait... Retrieving data from" + " " + "r/" + subreddit_i
 
     # Return error message if stock does not exist
     elif search_input.upper() != '' and search_input.upper() not in whitelist:
-        print(search_input)
-        print(whitelist)
         st.error("Error: Invalid stock symbol. Please type a valid stock symbol such as 'AAPL'.")
 
 # CUSTOMIZATION: Change Streamlit footer again to prevent clipping
