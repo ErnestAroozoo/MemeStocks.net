@@ -4,6 +4,7 @@ from datetime import timedelta
 import praw
 import psycopg2
 import csv
+from psycopg2 import sql
 
 # Heroku PostgreSQL Database
 con = psycopg2.connect(
@@ -27,11 +28,25 @@ with open('stock_tickers.csv', newline='') as f:
 today = datetime.today().utcnow().strftime('%Y-%m-%d')  # Retrieve today's date in UTC
 
 
-# FUNCTION: Store Reddit posts locally for more optimal scraping
+# FUNCTION: Store Reddit posts as a list locally for more optimal scraping
 def scrape_posts(subreddit_name):
     # Initialize variables
     posts_list = []  # List used to store the title of all posts within the time range
-    for posts in reddit.subreddit(subreddit_name).new(limit=1000):
+    for posts in reddit.subreddit(subreddit_name).new(limit=100000):
+        post_date = datetime.utcfromtimestamp(posts.created).strftime('%Y-%m-%d')  # Retrieve post's date in UTC
+        # Case 1: If the post date is today then add it to the list
+        if post_date == today:
+            posts_list.append(posts.title)
+            print(post_date)
+        # Case 2: If post date is not today meaning we can end loop early
+        else:
+            break
+    return posts_list
+
+# FUNCTION: Store historical Reddit posts as a list
+    # Initialize variables
+    posts_list = []  # List used to store the title of all posts within the time range
+    for posts in reddit.subreddit(subreddit_name).new(limit=100000):
         post_date = datetime.utcfromtimestamp(posts.created).strftime('%Y-%m-%d')  # Retrieve post's date in UTC
         # Case 1: If the post date is today then add it to the list
         if post_date == today:
@@ -43,7 +58,7 @@ def scrape_posts(subreddit_name):
     return posts_list
 
 
-# FUNCTION: Parse the list of titles for specified keywords
+# FUNCTION: Parse the list of titles for specified keywords and commit to database
 def parse_posts(posts_list):
     for tickers in data:
         # Initialize variables
@@ -69,8 +84,31 @@ def parse_posts(posts_list):
     con.commit()
 
 
+# # FUNCTION: Only need to run once to initialize databases for all stocks
+# def create_database_stocks():
+#     for tickers in data:
+#         sql_code = """
+#             CREATE TABLE public.%s
+#             (
+#                 date date NOT NULL,
+#                 mentions_posts integer NOT NULL,
+#                 posts_data text[] NOT NULL,
+#                 mentions_comments integer NOT NULL,
+#                 comments_data text[] NOT NULL,
+#                 PRIMARY KEY (date)
+#             );
+#         """
+#         ticker = str(tickers[0])
+#         database_name = ticker.lower() + "_wallstreetbets"
+#         sql_code = sql_code % database_name
+#         print(sql_code)
+#         cur.execute(sql_code)
+#         con.commit()
+
+
 if __name__ == "__main__":
     wallstreetbets_posts_list = scrape_posts('wallstreetbets')  # Retrieve a list of posts from r/wallstreetbets
     parse_posts(wallstreetbets_posts_list)  # Parse title from r/wallstreetbets for keywords
+
     cur.close()
     con.close()

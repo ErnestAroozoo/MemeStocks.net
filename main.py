@@ -21,8 +21,10 @@ with open('stock_tickers.csv', newline='') as f:
     reader = csv.reader(f)
     data = list(reader)
 whitelist = []
+stock_name_list = []
 for stock_info in data:
     whitelist.append(stock_info[0])
+    stock_name_list.append(stock_info[1])
 
 # CUSTOMIZATION: Page config
 st.set_page_config(
@@ -96,57 +98,72 @@ st.markdown(hide_anchor_style, unsafe_allow_html=True)
 
 # FUNCTION: Display stock information
 def stock_info():
-    progress_bar.progress(0)
-
-    stock_data = yahoo_finance.get_info(search_input.upper())  # Retrieves dictionary object with info
-
     st.subheader('Information')
-
-    # Initialize variables to retrieve information on stocks from Yahoo Finance
-    try:
-        stock_name = stock_data['shortName']
-    except:
-        stock_name = "N/A"
-
-    try:
-        stock_sector = stock_data['sector']
-    except:
-        stock_sector = "N/A"
-
-    try:
-        stock_country = stock_data['country']
-    except:
-        stock_country = "N/A"
-
-    try:
-        stock_price = "$" + str(stock_data['regularMarketPrice'])
-    except:
-        stock_price = "N/A"
+    # stock_data = yahoo_finance.get_info(search_input.upper())  # Retrieves dictionary object with info
+    #
+    # st.subheader('Information')
+    #
+    # # Initialize variables to retrieve information on stocks from Yahoo Finance
+    # try:
+    #     stock_name = stock_data['shortName']
+    # except:
+    #     stock_name = "N/A"
+    #
+    # try:
+    #     stock_sector = stock_data['sector']
+    # except:
+    #     stock_sector = "N/A"
+    #
+    # try:
+    #     stock_country = stock_data['country']
+    # except:
+    #     stock_country = "N/A"
+    #
+    # try:
+    #     stock_price = "$" + str(stock_data['regularMarketPrice'])
+    # except:
+    #     stock_price = "N/A"
+    #
+    # # Create columns for section 1
+    # col1, col2, col3, col4 = st.columns(4)
+    #
+    # with col1:
+    #     st.metric(label="Name", value=stock_name)
+    #     progress_bar.progress(30)
+    #
+    # with col2:
+    #     st.metric(label="Sector", value=stock_sector)
+    #     progress_bar.progress(50)
+    #
+    # with col3:
+    #     st.metric(label="Country", value=stock_country)
+    #     progress_bar.progress(70)
+    #
+    # with col4:
+    #     st.metric(label="Price", value=stock_price)
+    #     progress_bar.progress(80)
 
     # Create columns for section 1
-    col1, col2, col3, col4 = st.columns(4)
+    whitelist_index = -1
+    for k in whitelist:
+        whitelist_index = whitelist_index + 1
+        if search_input.upper() == k:
+            break
+
+    col1, col2 = st.columns(2)
 
     with col1:
-        st.metric(label="Name", value=stock_name)
-        progress_bar.progress(30)
+
+        st.metric(label="Stock Symbol", value="$"+search_input.upper())
 
     with col2:
-        st.metric(label="Sector", value=stock_sector)
-        progress_bar.progress(50)
-
-    with col3:
-        st.metric(label="Country", value=stock_country)
-        progress_bar.progress(70)
-
-    with col4:
-        st.metric(label="Price", value=stock_price)
-        progress_bar.progress(80)
+        st.metric(label="Name", value=stock_name_list[whitelist_index])
 
     st.markdown("""---""")
 
     # Create columns for section 2
     with st.container():
-        col5, col6 = st.columns([8, 3])
+        col5, col6 = st.columns([4, 3])
 
         with col5:
             st.subheader('Price Chart')
@@ -159,7 +176,7 @@ def stock_info():
           <script type="text/javascript">
           new TradingView.widget(
           {
-          "width": 1000,
+          "width": 800,
           "height": 500,
           "symbol":""" "\"" + str(search_input.upper()) + "\"" + """,
                "interval": "D",
@@ -177,20 +194,29 @@ def stock_info():
                </script>
              </div>
              <!-- TradingView Widget END -->
-                     """, width=1000, height=500, scrolling=False
+                     """, width=800, height=500, scrolling=False
             )
 
         with col6:
             st.subheader('Mentions Data')
-            cur.execute("SELECT * FROM mentions_posts")
+            # Retrieve data from PostgreSQL
+            sql_code = "SELECT * FROM %s"
+            database_name = search_input.lower() + "_" + subreddit_input.lower()
+            sql_code = sql_code % database_name
+            print(sql_code)
+            cur.execute(sql_code)
             rows = cur.fetchall()
-            data_panda = pd.DataFrame(rows,
-                                      columns=['Date', 'Stock Symbol', 'Subreddit', 'Number of Mentions',
-                                               'Submission Titles'])
-            st.dataframe(data_panda)
+            # Create Pandas object
+            df = pd.DataFrame(rows, columns=['Date', 'Mentions (Posts)', 'Post Titles', 'Mentions (Comments)',
+                                             'Comments'])
 
-        progress_bar.progress(100)
-        progress_bar.empty()
+            # df_filter = df['Stock Symbol'] == search_input.upper()
+            # df_filtered = df[df_filter]
+            #
+            # df_filtered.set_index('Date', inplace=True)
+            # st.dataframe(data=df_filtered, width=1000)
+
+            st.dataframe(data=df, width=1000)
 
 
 # Title of the web app
@@ -198,18 +224,17 @@ st.title("📈 MemeStocks.net")
 
 # Search input
 search_input = st.text_input('Stock Symbol', '', max_chars=5, key=str,
-                             placeholder="Type a valid stock symbol (e.g. 'GME')")
+                             placeholder="Type a stock symbol and then press enter (e.g. GME)")
 subreddit_input = st.selectbox('Subreddit', ['WallStreetBets'])
 
 # Display information if stock exists
 with st.spinner("Please wait... Retrieving data from" + " " + "r/" + subreddit_input + "."):
     if search_input.upper() != '' and search_input.upper() in whitelist:
-        progress_bar = st.progress(0)
         stock_info()
 
     # Return error message if stock does not exist
     elif search_input.upper() != '' and search_input.upper() not in whitelist:
-        st.error("Error: Invalid stock symbol. Please type a valid stock symbol such as 'AAPL'.")
+        st.error("Error: Invalid stock symbol. Please type a valid stock symbol such as AAPL.")
 
 # CUSTOMIZATION: Change Streamlit footer again to prevent clipping
 add_footer_style2 = """<style>
