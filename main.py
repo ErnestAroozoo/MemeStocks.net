@@ -105,45 +105,14 @@ def stock_info():
         "Disclaimer: The data provided should be used for informational purposes only and in no way should be relied upon for financial advice.",
         icon="⚠️")
     # Create columns for section 1
+    st.subheader('Information')
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader('Information')
         st.metric(label="Stock Symbol", value="$" + search_input.upper())
-        st.metric(label="Name", value=stock_name_list[whitelist.index(search_input)])
 
     with col2:
-        st.subheader('Price Chart')
-        components.html(
-            """
-    <!-- TradingView Widget BEGIN -->
-    <div class="tradingview-widget-container">
-      <div id="tradingview_c45b8"></div>
-      <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-      <script type="text/javascript">
-      new TradingView.widget(
-      {
-      "width": 700,
-      "height": 180,
-      "symbol":""" "\"" + str(search_input.upper()) + "\"" + """,
-                   "interval": "D",
-                   "timezone": "exchange",
-                   "theme": "dark",
-                   "style": "1",
-                   "locale": "en",
-                   "toolbar_bg": "#f1f3f6",
-                   "enable_publishing": false,
-                   "hide_top_toolbar": true,
-                   "hide_legend": true,
-                   "save_image": false,
-                   "container_id": "tradingview_c45b8"
-                 }
-                   );
-                   </script>
-                 </div>
-                 <!-- TradingView Widget END -->
-                         """, width=700, height=180, scrolling=False
-        )
+        st.metric(label="Name", value=stock_name_list[whitelist.index(search_input)])
 
     st.markdown("""---""")
 
@@ -165,11 +134,41 @@ def stock_info():
 
     # Create columns for section 2
     with st.container():
-        col5, col6 = st.columns(2)
+        col3, col4, col5 = st.columns(3)
+        with col3:
+            st.line_chart(data=df2, x='Date', y='# of Posts', width=1000, height=190, use_container_width=True)
+        with col4:
+            st.line_chart(data=df2, x='Date', y='# of Comments', width=1000, height=190, use_container_width=True)
         with col5:
-            st.line_chart(data=df2, x='Date', y='# of Posts', width=1000, height=300, use_container_width=True)
-        with col6:
-            st.line_chart(data=df2, x='Date', y='# of Comments', width=1000, height=300, use_container_width=True)
+            components.html(
+                """
+        <!-- TradingView Widget BEGIN -->
+        <div class="tradingview-widget-container">
+          <div id="tradingview_c45b8"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+          <script type="text/javascript">
+          new TradingView.widget(
+          {
+          "autosize": true,
+          "symbol":""" "\"" + str(search_input.upper()) + "\"" + """,
+                               "interval": "D",
+                               "timezone": "exchange",
+                               "theme": "dark",
+                               "style": "1",
+                               "locale": "en",
+                               "toolbar_bg": "#f1f3f6",
+                               "enable_publishing": false,
+                               "hide_top_toolbar": true,
+                               "hide_legend": true,
+                               "save_image": false,
+                               "container_id": "tradingview_c45b8"
+                             }
+                               );
+                               </script>
+                             </div>
+                             <!-- TradingView Widget END -->
+                                     """, scrolling=False
+            )
 
     con.close()
 
