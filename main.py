@@ -113,64 +113,63 @@ def stock_info():
         st.metric(label="Name", value=stock_name_list[whitelist.index(search_input)])
 
     with col2:
-        st.subheader('Mentions Data')
-        database_name = search_input.lower()
-        # Create Pandas object using data from PostgreSQL
-        df = pd.read_sql_table(database_name, connection)
-        # Filter columns based on user selection (e.g. subreddit)
-        df_filter = df[["date", subreddit_input.lower() + "_posts", subreddit_input.lower() + "_posts_data",
-                        subreddit_input.lower() + "_comments", subreddit_input.lower() + "_comments_data"]]
-        # Create new table with renamed column titles
-        df2 = df_filter.set_axis(['Date', '# of Posts', 'Posts', '# of Comments', 'Comments'], axis=1, inplace=False)
-        # Sort data by date
-        df2 = df2.sort_values(by='Date', ascending=False)
-        # Change date format to YY-MM-DD
-        df2["Date"] = pd.to_datetime(df2["Date"]).dt.date
-        # Display Pandas table
-        st.dataframe(data=df2, height=160, width=1000)
+        st.subheader('Price Chart')
+        components.html(
+            """
+    <!-- TradingView Widget BEGIN -->
+    <div class="tradingview-widget-container">
+      <div id="tradingview_c45b8"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+      <script type="text/javascript">
+      new TradingView.widget(
+      {
+      "width": 700,
+      "height": 180,
+      "symbol":""" "\"" + str(search_input.upper()) + "\"" + """,
+                   "interval": "D",
+                   "timezone": "exchange",
+                   "theme": "dark",
+                   "style": "1",
+                   "locale": "en",
+                   "toolbar_bg": "#f1f3f6",
+                   "enable_publishing": false,
+                   "hide_top_toolbar": true,
+                   "hide_legend": true,
+                   "save_image": false,
+                   "container_id": "tradingview_c45b8"
+                 }
+                   );
+                   </script>
+                 </div>
+                 <!-- TradingView Widget END -->
+                         """, width=700, height=180, scrolling=False
+        )
 
     st.markdown("""---""")
 
+    st.subheader('Mentions Data')
+    database_name = search_input.lower()
+    # Create Pandas object using data from PostgreSQL
+    df = pd.read_sql_table(database_name, connection)
+    # Filter columns based on user selection (e.g. subreddit)
+    df_filter = df[["date", subreddit_input.lower() + "_posts", subreddit_input.lower() + "_posts_data",
+                    subreddit_input.lower() + "_comments", subreddit_input.lower() + "_comments_data"]]
+    # Create new table with renamed column titles
+    df2 = df_filter.set_axis(['Date', '# of Posts', 'Posts', '# of Comments', 'Comments'], axis=1, inplace=False)
+    # Sort data by date
+    df2 = df2.sort_values(by='Date', ascending=False)
+    # Change date format to YY-MM-DD
+    df2["Date"] = pd.to_datetime(df2["Date"]).dt.date
+    # Display Pandas table
+    st.dataframe(data=df2, height=140)
+
     # Create columns for section 2
     with st.container():
-        col3, col4 = st.columns(2)
-
-        with col3:
-            st.subheader('Price Chart')
-            components.html(
-                """
-        <!-- TradingView Widget BEGIN -->
-        <div class="tradingview-widget-container">
-          <div id="tradingview_c45b8"></div>
-          <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-          <script type="text/javascript">
-          new TradingView.widget(
-          {
-          "width": 700,
-          "height": 500,
-          "symbol":""" "\"" + str(search_input.upper()) + "\"" + """,
-               "interval": "D",
-               "timezone": "exchange",
-               "theme": "dark",
-               "style": "1",
-               "locale": "en",
-               "toolbar_bg": "#f1f3f6",
-               "enable_publishing": false,
-               "hide_top_toolbar": true,
-               "hide_legend": true,
-               "save_image": false,
-               "container_id": "tradingview_c45b8"
-             }
-               );
-               </script>
-             </div>
-             <!-- TradingView Widget END -->
-                     """, width=700, height=500, scrolling=False
-            )
-
-        with col4:
-            st.subheader('Sentiment Chart')
-            st.caption("Data Unavailable")
+        col5, col6 = st.columns(2)
+        with col5:
+            st.line_chart(data=df2, x='Date', y='# of Posts', width=1000, height=300, use_container_width=True)
+        with col6:
+            st.line_chart(data=df2, x='Date', y='# of Comments', width=1000, height=300, use_container_width=True)
 
     con.close()
 
