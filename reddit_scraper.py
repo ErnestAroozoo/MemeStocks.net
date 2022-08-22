@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import datetime as dt
 import praw
 import psycopg2
 import csv
 from psaw import PushshiftAPI
 from psycopg2 import sql
+import time
 
 # Heroku PostgreSQL Database
 con = psycopg2.connect(
@@ -20,112 +21,129 @@ with open('stock_tickers.csv', newline='') as f:
     reader = csv.reader(f)
     data = list(reader)
 
-    # Reddit PRAW Client
-    reddit = praw.Reddit(client_id='EXQz_JfwBsIDzxPleRVxUg', client_secret='wSRhPRaYmr-uN_htZhnfPwSVJPkTnQ',
-                         redirect_uri='https://memestocks.net', user_agent='memestocks_net')
+# # Reddit PRAW Client
+# reddit = praw.Reddit(client_id='EXQz_JfwBsIDzxPleRVxUg', client_secret='wSRhPRaYmr-uN_htZhnfPwSVJPkTnQ',
+#                      redirect_uri='https://memestocks.net', user_agent='memestocks_net')
 
 
-# # FUNCTION: Store Reddit posts as a list locally for more optimal scraping
-# def scrape_posts(subreddit_name):
-#     # Initialize variables
-#     posts_list = []  # List used to store the title of all posts within the time range
-#     for posts in reddit.subreddit(subreddit_name).new(limit=1000000):
-#         post_date = datetime.utcfromtimestamp(posts.created).strftime('%Y-%m-%d')  # Retrieve post's date in UTC
-#         # Case 1: If the post date is today then add it to the list
-#         if post_date == today:
-#             posts_list.append(posts.title)
-#             print(post_date)
-#         # Case 2: If post date is not today meaning we can end loop early
-#         else:
-#             break
-#     return posts_list
+# FUNCTION: Check if data already exists for a specific date
+def date_exists(ticker_name, date_row):
+    cur.execute(
+        sql.SQL("""
+        SELECT date FROM {table} where date = %s
+        """).format(table=sql.Identifier(ticker_name.lower())),
+        [str(date_row), ]
+    )
+    if cur.fetchone() is not None:
+        return True
+    elif cur.fetchone is None:
+        return False
 
 
 # FUNCTION: Scrape historical data using PushShift
 def scrape_historical_posts(subreddit_name):
     # Initialize PushShift API
     api = PushshiftAPI()
-    # Initialize the time to search for
-    start_time = int(dt.datetime(2022, 1, 1).timestamp())
-    print("After (Unix): " + str(start_time))
-    print("After (YYYY-MM-DD): " + datetime.utcfromtimestamp(start_time).strftime("%Y-%m-%d"))
-    # Search through all the stock tickers
-    for ticker in data:
-        stock_symbol = ticker[0]
-        comments = list(api.search_comments(after=start_time,
-                                            q=str(stock_symbol),
-                                            subreddit=subreddit_name,
-                                            filter=['url', 'author', 'title', 'subreddit', 'body']))
-        submissions = list(api.search_comments(after=start_time,
-                                               q=str(stock_symbol),
-                                               subreddit=subreddit_name,
-                                               filter=['url', 'author', 'title', 'subreddit']))
+    # Date to end scraping
+    start_time = int(dt.datetime(2021, 12, 31).timestamp())
+    # Date range for scraping (1 day = 86400 seconds)
+    after_time = int(dt.datetime(2022, 8, 20).timestamp())  # Stop scraping when after_time = start_time
+    before_time = after_time + 86400
 
-        for submission in submissions:
-            submission_title = submission.title
-            submission_date = datetime.utcfromtimestamp(submission.created_utc).strftime("%Y-%m-%d")
-            cur.execute("""
-            INSERT INTO %s (date, wallstreetbets_posts, wallstreetbets_posts_data)
-            VALUES (%s, %s, %s) 
-            """, (stock_symbol, submission_date))
+    print("Date to end scraping (YYYY-MM-DD): " + datetime.utcfromtimestamp(start_time).strftime("%Y-%m-%d"))
 
-        for comment in comments:
-            comment_body = comment.body
-            comment_date = datetime.utcfromtimestamp(submission.created_utc).strftime("%Y-%m-%d")
+    # While loop to retrieve data for every date interval until start_time
+    while after_time > start_time:
+        print("After " + datetime.utcfromtimestamp(after_time).strftime("%Y-%m-%d"))
+        print("Before " + datetime.utcfromtimestamp(before_time).strftime("%Y-%m-%d"))
+        submission_date = datetime.utcfromtimestamp(after_time).strftime("%Y-%m-%d")
+        # For loop to go through every stock symbol
+        for stock_info in data:
+            stock_symbol = stock_info[0]
+            comments_data = []
+            submissions_data = []
+            # Retrieve all comments object with the specified stock symbol
+            comments = list(api.search_comments(after=after_time,
+                                                before=before_time,
+                                                q=str(stock_symbol),
+                                                subreddit=subreddit_name,
+                                                filter=['url', 'author', 'title', 'subreddit', 'body']))
+            # Retrieve all submissions object with the specified stock symbol
+            submissions = list(api.search_submissions(after=after_time,
+                                                      before=before_time,
+                                                      q=str(stock_symbol),
+                                                      subreddit=subreddit_name,
+                                                      filter=['url', 'author', 'title', 'subreddit']))
 
+            # Collect all Submission Titles into a list for analysis
+            for submission in submissions:
+                submissions_data.append(submission.title)
+            submission_numbers = len(submissions_data)
+            # Case 1: If date exists in database then update existing row
+            if date_exists(stock_symbol, submission_date):
+                cur.execute(
+                    sql.SQL("""
+                    UPDATE {table}
+                    SET wallstreetbets_posts = %s, wallstreetbets_posts_data = %s
+                    WHERE date = %s
+                    """).format(table=sql.Identifier(stock_symbol.lower())),
+                    [submission_numbers, submissions_data, submission_date]
+                )
+            # Case 2: If date does not exist in database then insert new row
+            else:
+                cur.execute(
+                    sql.SQL("""
+                    INSERT INTO {table} (date, wallstreetbets_posts, wallstreetbets_posts_data)
+                    VALUES (%s, %s, %s)
+                    """).format(table=sql.Identifier(stock_symbol.lower())),
+                    [submission_date, submission_numbers, submissions_data]
+                )
+            # Commit updates to database
+            print(stock_symbol)
+            print(submission_date)
+            print(submission_numbers)
+            print(submissions_data)
+            con.commit()
 
-# # FUNCTION: Parse the list of titles for specified keywords and commit to database
-# def parse_posts(posts_list):
-#     for tickers in data:
-#         # Initialize variables
-#         ticker = tickers[0]
-#         whitelist_keyword1 = ticker.upper()
-#         whitelist_keyword2 = '$' + ticker.upper()
-#         mentions_posts = 0
-#         content = []
-#         for titles in posts_list:
-#             post_title_keywords = titles.upper().split()
-#             # Case 1: Post date is today and keywords are in the title
-#             if whitelist_keyword1 in post_title_keywords or whitelist_keyword2 in post_title_keywords:
-#                 mentions_posts = mentions_posts + 1  # Count number of mentions from posts
-#                 content.append(titles)  # Append post title into a list
-#
-#         print("Symbol: " + ticker + " | Mentions: " + str(mentions_posts))
-#         print(content)
-#         # Insert data into PostgreSQL
-#         cur.execute("""
-#         INSERT INTO mentions_posts (date, stock_symbol, subreddit, mentions_posts, content)
-#         VALUES (%s, %s, %s, %s, %s)
-#         """, (today, ticker, 'wallstreetbets', mentions_posts, content))
-#     con.commit()
+            # Collect all Comment Bodies into a list for analysis
+            for comment in comments:
+                comments_data.append(comment.body)
+            comment_numbers = len(comments_data)
+            # Case 1: If date exists in database then update existing row
+            if date_exists(stock_symbol, submission_date):
+                cur.execute(
+                    sql.SQL("""
+                    UPDATE {table}
+                    SET wallstreetbets_comments = %s, wallstreetbets_comments_data = %s
+                    WHERE date = %s
+                    """).format(table=sql.Identifier(stock_symbol.lower())),
+                    [comment_numbers, comments_data, submission_date]
+                )
+            # Case 2: If date does not exist in database then insert new row
+            else:
+                cur.execute(
+                    sql.SQL("""
+                    INSERT INTO {table} (date, wallstreetbets_comments, wallstreetbets_comments_data)
+                    VALUES (%s, %s, %s)
+                    """).format(table=sql.Identifier(stock_symbol.lower())),
+                    [submission_date, comment_numbers, comments_data]
+                )
 
+            # Commit updates to database
+            print(stock_symbol)
+            print(submission_date)
+            print(comment_numbers)
+            print(comments_data)
+            con.commit()
 
-# # FUNCTION: Only need to run once to initialize databases for all stocks
-# def create_database_stocks():
-#     for tickers in data:
-#         sql_code = """
-#             CREATE TABLE public.%s
-#             (
-#                 date date NOT NULL,
-#                 wallstreetbets_posts integer,
-#                 wallstreetbets_posts_data text[],
-#                 wallstreetbets_comments integer,
-#                 wallstreetbets_comments_data text[],
-#                 PRIMARY KEY (date)
-#             );
-#         """
-#         ticker = str(tickers[0])
-#         database_name = ticker
-#         sql_code = sql_code % database_name
-#         print(sql_code)
-#         cur.execute(sql_code)
-#         con.commit()
+        # Update date interval each loop until after_time = start_time
+        after_time = after_time - 86400
+        before_time = after_time + 86400
+
+    # Close connection to database
+    cur.close()
+    con.close()
 
 
 if __name__ == "__main__":
-    # wallstreetbets_posts_list = scrape_posts('wallstreetbets')  # Retrieve a list of posts from r/wallstreetbets
-    # parse_posts(wallstreetbets_posts_list)  # Parse title from r/wallstreetbets for keywords
-    # cur.close()
-    # con.close()
-    # scrape_historical_posts("wallstreetbets")
-    print("test")
+    scrape_historical_posts("wallstreetbets")
