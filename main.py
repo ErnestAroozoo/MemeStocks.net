@@ -101,6 +101,9 @@ st.markdown(hide_anchor_style, unsafe_allow_html=True)
 
 # FUNCTION: Display stock information
 def stock_info():
+    st.warning(
+        "Disclaimer: The data provided should be used for informational purposes only and in no way should be relied upon for financial advice.",
+        icon="⚠️")
     # Create columns for section 1
     col1, col2 = st.columns(2)
 
@@ -186,7 +189,7 @@ if search_input.upper() != '' and search_input.upper() in whitelist:
 
 # Case 2: Return error message if stock does not exist
 elif search_input.upper() != '' and search_input.upper() not in whitelist:
-    st.error("Error: Invalid stock symbol. Please type a valid stock symbol (e.g. AAPL).")
+    st.error("Error: Invalid stock symbol. Please type a valid stock symbol (e.g. AAPL).", icon="🚨")
 
 # CUSTOMIZATION: Change Streamlit footer again to prevent clipping
 add_footer_style2 = """<style>

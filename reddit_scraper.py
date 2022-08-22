@@ -47,7 +47,7 @@ def scrape_historical_posts(subreddit_name):
     # Date to end scraping
     start_time = int(dt.datetime(2021, 12, 31).timestamp())
     # Date range for scraping (1 day = 86400 seconds)
-    after_time = int(dt.datetime(2022, 8, 20).timestamp())  # Stop scraping when after_time = start_time
+    after_time = int(dt.datetime(2022, 8, 21).timestamp())  # Stop scraping when after_time = start_time
     before_time = after_time + 86400
 
     print("Date to end scraping (YYYY-MM-DD): " + datetime.utcfromtimestamp(start_time).strftime("%Y-%m-%d"))
