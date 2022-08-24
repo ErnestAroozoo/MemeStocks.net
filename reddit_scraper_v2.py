@@ -21,10 +21,9 @@ with open('stock_tickers.csv', newline='') as f:
     reader = csv.reader(f)
     data = list(reader)
 
-
-# # Reddit PRAW Client
-# reddit = praw.Reddit(client_id='EXQz_JfwBsIDzxPleRVxUg', client_secret='wSRhPRaYmr-uN_htZhnfPwSVJPkTnQ',
-#                      redirect_uri='https://memestocks.net', user_agent='memestocks_net')
+# Initialize today's date
+    today_date = str(date.today())
+    today_date_unix = int(time.mktime(dt.datetime.strptime(today_date, "%Y-%m-%d").timetuple()))
 
 
 # FUNCTION: Check if data already exists for a specific date
@@ -46,8 +45,6 @@ def scrape_daily_posts(subreddit_name):
     # Initialize PushShift API
     api = PushshiftAPI()
     # Date range for scraping
-    today_date = str(date.today())
-    today_date_unix = int(time.mktime(dt.datetime.strptime(today_date, "%Y-%m-%d").timetuple()))
     yesterday_date_unix = today_date_unix - 86400
     tomorrow_date_unix = today_date_unix + 86400
     after_time = today_date_unix  # After Today's Date 12:00am
@@ -141,12 +138,10 @@ def scrape_yesterday_posts(subreddit_name):
     # Initialize PushShift API
     api = PushshiftAPI()
     # Date range for scraping
-    today_date = str(date.today())
-    today_date_unix = int(time.mktime(dt.datetime.strptime(today_date, "%Y-%m-%d").timetuple()))
     yesterday_date_unix = today_date_unix - 86400
     tomorrow_date_unix = today_date_unix + 86400
-    after_time = yesterday_date_unix  # After Today's Date 12:00am
-    before_time = today_date_unix  # Before Tomorrow's Date 12:00am
+    after_time = yesterday_date_unix  # After Yesterday's Date 12:00am
+    before_time = today_date_unix  # Before Today's Date 12:00am
 
     print("Date to perform data scraping (YYYY-MM-DD): " + datetime.utcfromtimestamp(after_time).strftime("%Y-%m-%d"))
 
