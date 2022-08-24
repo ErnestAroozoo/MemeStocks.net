@@ -135,10 +135,6 @@ def scrape_daily_posts(subreddit_name):
         print(comments_data)
         con.commit()
 
-    # Close connection to database
-    cur.close()
-    con.close()
-
 
 # FUNCTION: Scrape yesterday data with Pushshift
 def scrape_yesterday_posts(subreddit_name):
@@ -238,3 +234,6 @@ def scrape_yesterday_posts(subreddit_name):
 if __name__ == "__main__":
     scrape_daily_posts("wallstreetbets")
     scrape_yesterday_posts("wallstreetbets")
+    # Close connection to database
+    cur.close()
+    con.close()
