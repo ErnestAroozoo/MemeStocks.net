@@ -9,10 +9,11 @@ import time
 
 # Heroku PostgreSQL Database
 con = psycopg2.connect(
-    host="ec2-52-207-15-147.compute-1.amazonaws.com",
-    database="db02648v92l1c3",
-    user="vyodltuwdpfjsh",
-    password="c4edb887115a1cf4a665e02aba475d16b115154bff6b49615936a38b416bac47"
+    host="containers-us-west-69.railway.app",
+    database="railway",
+    user="postgres",
+    password="A3ZyGuamiu2AZ2z7H1vI",
+    port=6898
 )
 cur = con.cursor()
 
