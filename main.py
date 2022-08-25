@@ -17,7 +17,7 @@ con = psycopg2.connect(
     port=6898
 )
 cur = con.cursor()
-db_string = "postgresql://vyodltuwdpfjsh:c4edb887115a1cf4a665e02aba475d16b115154bff6b49615936a38b416bac47@ec2-52-207-15-147.compute-1.amazonaws.com:5432/db02648v92l1c3"
+db_string = "postgresql://postgres:A3ZyGuamiu2AZ2z7H1vI@containers-us-west-69.railway.app:6898/railway"
 connection = create_engine(db_string, pool_size=20, max_overflow=0).connect()
 
 # Stock Tickers CSV Database
