@@ -185,13 +185,35 @@ search_input = (st.text_input('Stock Symbol', '', max_chars=5, key=str,
                               placeholder="Type a stock symbol and then press enter (e.g. GME)")).strip().upper()
 subreddit_input = st.selectbox('Subreddit', ['WallStreetBets'])
 
+# Intro tutorial
+intro = st.empty()
+with intro.container():
+    # Info dialogue
+    st.info('Welcome to MemeStocks.net! To get started, please type a valid stock symbol in the search bar above and then press enter.', icon="ℹ️")
+    # Text body
+    st.markdown("""
+    ------------
+    ### What is MemeStocks.net?
+    MemeStocks.net is a web app that keeps track of the number of times a specific stock has been mentioned. After searching for a valid stock symbol above, multiple time series graphs will be generated to display the historical popularity a stock.
+    
+    ### How Does It Work?
+    Data scraping is performed on a daily basis in order to keep track of the number of times a stock has been mentioned.
+    """)
+    # Add gif
+    col1, col2, col3 = st.columns([20, 45, 20])
+    with col2:
+        st.image("tutorial.gif")
+
 # Case 1: Display information if stock exists
 if search_input.upper() != '' and search_input.upper() in whitelist:
+    intro.empty()
     stock_info()
 
 # Case 2: Return error message if stock does not exist
 elif search_input.upper() != '' and search_input.upper() not in whitelist:
+    intro.empty()
     st.error("Error: Invalid stock symbol. Please type a valid stock symbol (e.g. AAPL).", icon="🚨")
+
 
 # CUSTOMIZATION: Change Streamlit footer again to prevent clipping
 add_footer_style2 = """<style>
