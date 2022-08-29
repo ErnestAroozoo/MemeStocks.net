@@ -111,38 +111,11 @@ def stock_info():
 
     with col1:
         st.metric(label="Stock Symbol", value="$" + search_input.upper())
-
-    with col2:
         st.metric(label="Name", value=stock_name_list[whitelist.index(search_input)])
 
-    st.markdown("""---""")
-
-    st.subheader('Mentions Data')
-    database_name = search_input.lower()
-    # Create Pandas object using data from PostgreSQL
-    df = pd.read_sql_table(database_name, connection)
-    # Filter columns based on user selection (e.g. subreddit)
-    df_filter = df[["date", subreddit_input.lower() + "_posts", subreddit_input.lower() + "_posts_data",
-                    subreddit_input.lower() + "_comments", subreddit_input.lower() + "_comments_data"]]
-    # Create new table with renamed column titles
-    df2 = df_filter.set_axis(['Date', '# of Posts', 'Posts', '# of Comments', 'Comments'], axis=1, inplace=False)
-    # Sort data by date
-    df2 = df2.sort_values(by='Date', ascending=False)
-    # Change date format to YY-MM-DD
-    df2["Date"] = pd.to_datetime(df2["Date"]).dt.date
-    # Display Pandas table
-    st.dataframe(data=df2, height=140)
-
-    # Create columns for section 2
-    with st.container():
-        col3, col4, col5 = st.columns(3)
-        with col3:
-            st.line_chart(data=df2, x='Date', y='# of Posts', width=1000, height=190, use_container_width=True)
-        with col4:
-            st.line_chart(data=df2, x='Date', y='# of Comments', width=1000, height=190, use_container_width=True)
-        with col5:
-            components.html(
-                """
+    with col2:
+        components.html(
+            """
         <!-- TradingView Widget BEGIN -->
         <div class="tradingview-widget-container">
           <div id="tradingview_c45b8"></div>
@@ -169,7 +142,37 @@ def stock_info():
                              </div>
                              <!-- TradingView Widget END -->
                                      """, scrolling=False
-            )
+        )
+
+    st.markdown("""---""")
+
+    st.subheader('Mentions Data')
+    database_name = search_input.lower()
+    # Create Pandas object using data from PostgreSQL
+    df = pd.read_sql_table(database_name, connection)
+    # Filter columns based on user selection (e.g. subreddit)
+    df_filter = df[["date", subreddit_input.lower() + "_posts", subreddit_input.lower() + "_posts_data",
+                    subreddit_input.lower() + "_comments", subreddit_input.lower() + "_comments_data"]]
+    # Create new table with renamed column titles
+    df2 = df_filter.set_axis(['Date', '# of Posts', 'Posts', '# of Comments', 'Comments'], axis=1, inplace=False)
+    # Sort data by date
+    df2 = df2.sort_values(by='Date', ascending=False)
+    # Change date format to YY-MM-DD
+    df2["Date"] = pd.to_datetime(df2["Date"]).dt.date
+    # Display Pandas table
+    st.dataframe(data=df2, height=140, width=3000)
+
+    # Create columns for section 2
+    with st.container():
+        col3, col4, col5 = st.columns(3)
+        with col3:
+            st.line_chart(data=df2, x='Date', y='# of Posts', width=1000, height=250, use_container_width=True)
+        with col4:
+            st.line_chart(data=df2, x='Date', y='# of Comments', width=1000, height=250, use_container_width=True)
+        with col5:
+            df2["# of Posts & Comments"] = df2["# of Posts"] + df2["# of Comments"]
+            st.line_chart(data=df2, x='Date', y='# of Posts & Comments', width=1000, height=250,
+                          use_container_width=True)
 
     con.close()
 
