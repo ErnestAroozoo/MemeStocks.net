@@ -106,6 +106,7 @@ def stock_info():
         "Disclaimer: The data provided should be used for informational purposes only and in no way should be relied upon for financial advice.",
         icon="⚠️")
     # Create columns for section 1
+
     st.subheader('Information')
     col1, col2 = st.columns(2)
 
@@ -194,7 +195,7 @@ with intro.container():
     st.markdown("""
     ------------
     ### What is MemeStocks.net?
-    MemeStocks.net is a web app that keeps track of the number of times a specific stock has been mentioned. After searching for a valid stock symbol above, multiple time series graphs will be generated to display the historical popularity a stock.
+    MemeStocks.net is a web app that keeps track of the number of times a specific stock has been mentioned. After searching for a valid stock symbol above, multiple time series graphs will be generated to display the historical popularity of that stock.
     
     ### How Does It Work?
     Data scraping is performed on a daily basis in order to keep track of the number of times a stock has been mentioned.
@@ -213,7 +214,6 @@ if search_input.upper() != '' and search_input.upper() in whitelist:
 elif search_input.upper() != '' and search_input.upper() not in whitelist:
     intro.empty()
     st.error("Error: Invalid stock symbol. Please type a valid stock symbol (e.g. AAPL).", icon="🚨")
-
 
 # CUSTOMIZATION: Change Streamlit footer again to prevent clipping
 add_footer_style2 = """<style>
