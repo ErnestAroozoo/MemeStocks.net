@@ -8,28 +8,6 @@ import csv
 import pandas as pd
 from sqlalchemy import create_engine
 
-# Heroku PostgreSQL Database
-con = psycopg2.connect(
-    host="containers-us-west-69.railway.app",
-    database="railway",
-    user="postgres",
-    password="A3ZyGuamiu2AZ2z7H1vI",
-    port=6898
-)
-cur = con.cursor()
-db_string = "postgresql://postgres:A3ZyGuamiu2AZ2z7H1vI@containers-us-west-69.railway.app:6898/railway"
-connection = create_engine(db_string, pool_size=20, max_overflow=0).connect()
-
-# Stock Tickers CSV Database
-with open('stock_tickers.csv', newline='') as f:
-    reader = csv.reader(f)
-    data = list(reader)
-whitelist = []
-stock_name_list = []
-for stock_info in data:
-    whitelist.append(stock_info[0])
-    stock_name_list.append(stock_info[1])
-
 # CUSTOMIZATION: Page config
 st.set_page_config(
     page_title="MemeStocks.net - Stock sentiment analytical tool",
@@ -42,6 +20,16 @@ st.set_page_config(
         'About': "MemeStocks.net is a tool that scrapes Reddit for the number of stock mentions"
     }
 )
+
+# CUSTOMIZATION: Remove Streamlit components
+hide_menu_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_menu_style, unsafe_allow_html=True)
 
 # CUSTOMIZATION: Change Streamlit footer
 add_footer_style = """<style>
@@ -73,16 +61,6 @@ text-align: center;
 """
 st.markdown(add_footer_style, unsafe_allow_html=True)
 
-# CUSTOMIZATION: Remove Streamlit components
-hide_menu_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            header {visibility: hidden;}
-            </style>
-            """
-st.markdown(hide_menu_style, unsafe_allow_html=True)
-
 # CUSTOMIZATION: Remove Streamlit top margin
 hide_margin_style = """
 <style>
@@ -98,6 +76,28 @@ hide_anchor_style = """
 </style>
 """
 st.markdown(hide_anchor_style, unsafe_allow_html=True)
+
+# Heroku PostgreSQL Database
+con = psycopg2.connect(
+    host="containers-us-west-69.railway.app",
+    database="railway",
+    user="postgres",
+    password="A3ZyGuamiu2AZ2z7H1vI",
+    port=6898
+)
+cur = con.cursor()
+db_string = "postgresql://postgres:A3ZyGuamiu2AZ2z7H1vI@containers-us-west-69.railway.app:6898/railway"
+connection = create_engine(db_string, pool_size=20, max_overflow=0).connect()
+
+# Stock Tickers CSV Database
+with open('stock_tickers.csv', newline='') as f:
+    reader = csv.reader(f)
+    data = list(reader)
+whitelist = []
+stock_name_list = []
+for stock_info in data:
+    whitelist.append(stock_info[0])
+    stock_name_list.append(stock_info[1])
 
 
 # FUNCTION: Display stock information
@@ -195,10 +195,10 @@ with intro.container():
     st.markdown("""
     ------------
     ### What is MemeStocks.net?
-    MemeStocks.net is a web app that keeps track of the number of times a specific stock has been mentioned. After searching for a valid stock symbol above, multiple time series graphs will be generated to display the historical popularity of that stock.
+    MemeStocks.net is a web app that keeps track of the number of times a specific stock has been mentioned. After searching for a valid stock symbol above, multiple time series graphs will be generated to display the historical popularity of the stock.
     
     ### How Does It Work?
-    Data scraping is performed on a daily basis in order to keep track of the number of times a stock has been mentioned.
+    Data scraping is performed automatically on a daily basis to keep track of the number of times a stock has been mentioned.
     """)
     # Add gif
     col1, col2, col3 = st.columns([20, 45, 20])
