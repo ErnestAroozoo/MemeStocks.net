@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta, date
 import datetime as dt
-import praw
 import psycopg2
 import csv
-from psaw import PushshiftAPI
+from pmaw import PushshiftAPI
 from psycopg2 import sql
 import time
 
@@ -74,7 +73,7 @@ def scrape_daily_posts(subreddit_name):
 
         # Collect all Submission Titles into a list for analysis
         for submission in submissions:
-            submissions_data.append(submission.title)
+            submissions_data.append(submission['title'])
         submission_numbers = len(submissions_data)
         # Case 1: If date exists in database then update existing row
         if date_exists(stock_symbol, submission_date):
@@ -104,7 +103,7 @@ def scrape_daily_posts(subreddit_name):
 
         # Collect all Comment Bodies into a list for analysis
         for comment in comments:
-            comments_data.append(comment.body)
+            comments_data.append(comment['body'])
         comment_numbers = len(comments_data)
         # Case 1: If date exists in database then update existing row
         if date_exists(stock_symbol, submission_date):
@@ -167,7 +166,7 @@ def scrape_yesterday_posts(subreddit_name):
 
         # Collect all Submission Titles into a list for analysis
         for submission in submissions:
-            submissions_data.append(submission.title)
+            submissions_data.append(submission['title'])
         submission_numbers = len(submissions_data)
         # Case 1: If date exists in database then update existing row
         if date_exists(stock_symbol, submission_date):
@@ -197,7 +196,7 @@ def scrape_yesterday_posts(subreddit_name):
 
         # Collect all Comment Bodies into a list for analysis
         for comment in comments:
-            comments_data.append(comment.body)
+            comments_data.append(comment['body'])
         comment_numbers = len(comments_data)
         # Case 1: If date exists in database then update existing row
         if date_exists(stock_symbol, submission_date):
