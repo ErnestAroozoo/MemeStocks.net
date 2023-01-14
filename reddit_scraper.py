@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta
 import datetime as dt
-import praw
 import psycopg2
 import csv
-from psaw import PushshiftAPI
+from pmaw import PushshiftAPI
 from psycopg2 import sql
 import time
 
@@ -21,10 +20,6 @@ cur = con.cursor()
 with open('stock_tickers.csv', newline='') as f:
     reader = csv.reader(f)
     data = list(reader)
-
-# # Reddit PRAW Client
-# reddit = praw.Reddit(client_id='EXQz_JfwBsIDzxPleRVxUg', client_secret='wSRhPRaYmr-uN_htZhnfPwSVJPkTnQ',
-#                      redirect_uri='https://memestocks.net', user_agent='memestocks_net')
 
 
 # FUNCTION: Check if data already exists for a specific date
@@ -46,9 +41,9 @@ def scrape_historical_posts(subreddit_name):
     # Initialize PushShift API
     api = PushshiftAPI()
     # Date to end scraping
-    start_time = int(dt.datetime(2022, 8, 1).timestamp())
+    start_time = int(dt.datetime(2022, 12, 10).timestamp())
     # Date range for scraping (1 day = 86400 seconds)
-    after_time = int(dt.datetime(2022, 9, 4).timestamp())  # Stop scraping when after_time = start_time
+    after_time = int(dt.datetime(2023, 1, 12).timestamp())  # Stop scraping when after_time = start_time
     before_time = after_time + 86400
 
     print("Date to end scraping (YYYY-MM-DD): " + datetime.utcfromtimestamp(start_time).strftime("%Y-%m-%d"))
@@ -78,7 +73,7 @@ def scrape_historical_posts(subreddit_name):
 
             # Collect all Submission Titles into a list for analysis
             for submission in submissions:
-                submissions_data.append(submission.title)
+                submissions_data.append(submission['title'])
             submission_numbers = len(submissions_data)
             # Case 1: If date exists in database then update existing row
             if date_exists(stock_symbol, submission_date):
@@ -108,7 +103,7 @@ def scrape_historical_posts(subreddit_name):
 
             # Collect all Comment Bodies into a list for analysis
             for comment in comments:
-                comments_data.append(comment.body)
+                comments_data.append(comment['body'])
             comment_numbers = len(comments_data)
             # Case 1: If date exists in database then update existing row
             if date_exists(stock_symbol, submission_date):
