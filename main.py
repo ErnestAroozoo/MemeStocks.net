@@ -103,7 +103,7 @@ for stock_info in data:
 # FUNCTION: Display stock information
 def stock_info():
     st.warning(
-        "Disclaimer: The data provided should be used for informational purposes only and in no way should be relied upon for financial advice.",
+        "DISCLAIMER: The data provided should be used for informational purposes only and in no way should be relied upon for financial advice.",
         icon="⚠️")
     # Create columns for section 1
 
@@ -191,6 +191,9 @@ intro = st.empty()
 with intro.container():
     # Info dialogue
     st.info('Welcome to MemeStocks.net! To get started, please type a valid stock symbol in the search bar above and then press enter.', icon="ℹ️")
+    st.warning(
+        "Data scraping process is currently experiencing delays and some information may be missing due to updates in the Pushshift API. We are working to resolve the issue as soon as possible. We apologize for any inconvenience this may cause and appreciate your patience.",
+        icon="⚠️")
     # Text body
     st.markdown("""
     ------------
