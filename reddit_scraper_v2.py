@@ -5,14 +5,17 @@ import csv
 from pmaw import PushshiftAPI
 from psycopg2 import sql
 import time
+import os
+from dotenv import load_dotenv
 
 # Heroku PostgreSQL Database
+load_dotenv()
 con = psycopg2.connect(
-    host="containers-us-west-69.railway.app",
-    database="railway",
-    user="postgres",
-    password="A3ZyGuamiu2AZ2z7H1vI",
-    port=6898
+    host=os.getenv("DB_HOST"),
+    database=os.getenv("DB_NAME"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    port=os.getenv("DB_PORT")
 )
 cur = con.cursor()
 

@@ -1,12 +1,11 @@
 import psycopg2
 import streamlit as st
 import streamlit.components.v1 as components
-import reddit_scraper
-import yahoo_finance
-import time
 import csv
 import pandas as pd
 from sqlalchemy import create_engine
+import os
+from dotenv import load_dotenv
 
 # CUSTOMIZATION: Page config
 st.set_page_config(
@@ -21,72 +20,77 @@ st.set_page_config(
     }
 )
 
-# CUSTOMIZATION: Remove Streamlit components
-hide_menu_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            header {visibility: hidden;}
-            </style>
-            """
-st.markdown(hide_menu_style, unsafe_allow_html=True)
+# CUSTOMIZATION: Hide unnecessary UI elements
+hide_streamlit_style = """
+                <style>
+                div[data-testid="stToolbar"] {
+                visibility: hidden;
+                height: 0%;
+                position: fixed;
+                }
+                div[data-testid="stDecoration"] {
+                visibility: hidden;
+                height: 0%;
+                position: fixed;
+                }
+                div[data-testid="stStatusWidget"] {
+                visibility: hidden;
+                height: 0%;
+                position: fixed;
+                }
+                #MainMenu {
+                visibility: hidden;
+                height: 0%;
+                }
+                header {
+                visibility: hidden;
+                height: 0%;
+                }
+                footer {
+                visibility: hidden;
+                height: 0%;
+                }
+                .css-15zrgzn {display: none}
+                #root > div:nth-child(1) > div > div > div > div > section > div {padding-top: 0rem;}
+                </style>
+                """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-# CUSTOMIZATION: Change Streamlit footer
+# CUSTOMIZATION: Add custom footer
 add_footer_style = """<style>
-a:link , a:visited{
-color: blue;
-background-color: transparent;
-text-decoration: underline;
-}
-
-a:hover,  a:active {
-color: red;
-background-color: transparent;
-text-decoration: underline;
-}
-
 .footer {
 position: fixed;
 left: 0;
 bottom: 0;
 width: 100%;
 background-color: #212121;
-color: white;
+color: #f1f1f1;
 text-align: center;
+padding: 2px;
+font-size: 12px;
+}
+a {
+color: #f1f1f1;
+text-decoration: none;
 }
 </style>
 <div class="footer">
-<p>Made by Ernest Aroozoo</p>
+<p>Made by <a href='https://github.com/ErnestAroozoo' target='_blank'>Ernest Aroozoo</a> | <a href='https://github.com/ErnestAroozoo/MemeStocks.net' target='_blank'>View on GitHub</a></p>
 </div>
 """
 st.markdown(add_footer_style, unsafe_allow_html=True)
 
-# CUSTOMIZATION: Remove Streamlit top margin
-hide_margin_style = """
-<style>
-    #root > div:nth-child(1) > div > div > div > div > section > div {padding-top: 0rem;}
-</style>
-"""
-st.markdown(hide_margin_style, unsafe_allow_html=True)
-
-# CUSTOMIZATION: Hide anchor link
-hide_anchor_style = """
-<style>
-    .css-15zrgzn {display: none}
-</style>
-"""
-st.markdown(hide_anchor_style, unsafe_allow_html=True)
-
 # Heroku PostgreSQL Database
+load_dotenv()
 con = psycopg2.connect(
-    host="containers-us-west-69.railway.app",
-    database="railway",
-    user="postgres",
-    password="A3ZyGuamiu2AZ2z7H1vI",
-    port=6898
+    host=os.getenv("DB_HOST"),
+    database=os.getenv("DB_NAME"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    port=os.getenv("DB_PORT")
 )
 cur = con.cursor()
-db_string = "postgresql://postgres:A3ZyGuamiu2AZ2z7H1vI@containers-us-west-69.railway.app:6898/railway"
+db_string = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 connection = create_engine(db_string, pool_size=20, max_overflow=0).connect()
 
 # Stock Tickers CSV Database
@@ -225,32 +229,26 @@ elif search_input.upper() != '' and search_input.upper() not in whitelist:
     intro.empty()
     st.error("Error: Invalid stock symbol. Please type a valid stock symbol (e.g. AAPL).", icon="🚨")
 
-# CUSTOMIZATION: Change Streamlit footer again to prevent clipping
+# CUSTOMIZATION: Change footer again to prevent clipping
 add_footer_style2 = """<style>
-a:link , a:visited{
-color: blue;
-background-color: transparent;
-text-decoration: underline;
-}
-
-a:hover,  a:active {
-color: red;
-background-color: transparent;
-text-decoration: underline;
-}
-
 .footer {
 position: fixed;
 left: 0;
 bottom: 0;
 width: 100%;
 background-color: #212121;
-color: white;
+color: #f1f1f1;
 text-align: center;
+padding: 2px;
+font-size: 12px;
+}
+a {
+color: #f1f1f1;
+text-decoration: none;
 }
 </style>
 <div class="footer">
-<p>Made by Ernest Aroozoo</p>
+<p>Made by <a href='https://github.com/ErnestAroozoo' target='_blank'>Ernest Aroozoo</a> | <a href='https://github.com/ErnestAroozoo/MemeStocks.net' target='_blank'>View on GitHub</a></p>
 </div>
 """
 st.markdown(add_footer_style2, unsafe_allow_html=True)
