@@ -1,5 +1,5 @@
 # MemeStocks.net
-------------
+
 ### What is MemeStocks.net?
 MemeStocks.net is a web application that tracks the historical popularity of specific stocks by monitoring the number of mentions on Reddit. Users can search for a stock symbol and view information such as the stock's name, price, and historical popularity data. The data is gathered through web scraping and stored in a PostgreSQL database hosted on Heroku. The application generates multiple time-series graphs to display the historical popularity of the stock, allowing users to see trends in the stock's popularity over time and make more informed decisions about their investments.
 
