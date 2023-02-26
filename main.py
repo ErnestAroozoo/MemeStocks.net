@@ -3,9 +3,11 @@ import streamlit as st
 import streamlit.components.v1 as components
 import csv
 import pandas as pd
-from sqlalchemy import create_engine
 import os
+from sqlalchemy import create_engine
 from dotenv import load_dotenv
+from datetime import datetime
+from pytz import timezone
 
 # CUSTOMIZATION: Page config
 st.set_page_config(
@@ -223,11 +225,17 @@ with intro.container():
 if search_input.upper() != '' and search_input.upper() in whitelist:
     intro.empty()
     stock_info()
+    # Logs
+    if search_input != "" and subreddit_input != "":
+        print(f"[{datetime.now(timezone('EST'))}] Stock Symbol: {search_input}, Subreddit: {subreddit_input}")
 
 # Case 2: Return error message if stock does not exist
 elif search_input.upper() != '' and search_input.upper() not in whitelist:
     intro.empty()
     st.error("Error: Invalid stock symbol. Please type a valid stock symbol (e.g. AAPL).", icon="🚨")
+    # Logs
+    if search_input != "" and subreddit_input != "":
+        print(f"[{datetime.now(timezone('EST'))}] Stock Symbol: {search_input}, Subreddit: {subreddit_input}, Error: Invalid stock symbol")
 
 # CUSTOMIZATION: Change footer again to prevent clipping
 add_footer_style2 = """<style>
