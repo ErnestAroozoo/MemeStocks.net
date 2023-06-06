@@ -198,7 +198,7 @@ with intro.container():
     # Info dialogue
     st.info('Welcome to MemeStocks.net! To get started, please type a valid stock symbol in the search bar above and then press enter.', icon="ℹ️")
     st.warning(
-        "Data scraping process is currently experiencing delays and some information may be missing due to updates in the Pushshift API. We are working to resolve the issue as soon as possible. We apologize for any inconvenience this may cause and appreciate your patience.",
+        "We regret to inform you that due to recent changes in the terms of service of the Reddit API, we are no longer able to obtain new data. As of May 1, 2023, new data ingestion is no longer possible.",
         icon="⚠️")
     # Text body
     st.markdown("""
