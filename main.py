@@ -167,7 +167,7 @@ def stock_info():
     # Change date format to YY-MM-DD
     df2["Date"] = pd.to_datetime(df2["Date"]).dt.date
     # Display Pandas table
-    st.dataframe(data=df2, height=140, width=3000)
+    st.dataframe(data=df2, height=140, width=3000, hide_index=True)
 
     # Create columns for section 2
     with st.container():
