@@ -341,7 +341,7 @@ def stock_info_fragment():
         df_melted = df.melt(id_vars='Date', value_vars=['Number of Posts', 'Number of Comments', 'Number of Posts & Comments'],
                             var_name='Type', value_name='Count')
 
-        # Define custom colors for the gradient effect
+        # Define custom colors
         colors = {
             'Number of Posts': '#1d94d7',
             'Number of Comments': '#6464ef',
@@ -357,27 +357,6 @@ def stock_info_fragment():
             labels={'Count': 'Number'},
             template='plotly_dark',
             color_discrete_map=colors
-        )
-
-        # Add annotation for the most recent data point
-        latest_date = df['Date'].max()
-        latest_data = df[df['Date'] == latest_date].iloc[0]
-        annotation_text = (
-            f"Date: {latest_date}<br>"
-            f"Posts: {latest_data['Number of Posts']:,}<br>"
-            f"Comments: {latest_data['Number of Comments']:,}<br>"
-            f"Total: {latest_data['Number of Posts & Comments']:,}"
-        )
-        fig.add_annotation(
-            x=latest_date,
-            y=latest_data['Number of Posts & Comments'],
-            text=annotation_text,
-            showarrow=True,
-            arrowhead=1,
-            ax=0,
-            ay=-40,
-            bgcolor="rgba(0, 0, 0, 0.7)",
-            font=dict(color="white")
         )
 
         # Update layout to hide titles, grid lines, and adjust legend
@@ -399,19 +378,24 @@ def stock_info_fragment():
             showlegend=True,
             xaxis=dict(
                 showgrid=False,
-                rangeslider=dict(visible=True),
-                type="date"
+                rangeslider=dict(visible=False),  # Disable range slider
+                type="date",
+                automargin=True  # Auto adjust the x-axis
             ),
             yaxis=dict(
-                showgrid=False
+                showgrid=False,
+                automargin=True  # Auto adjust the y-axis
             ),
-            hovermode='x unified'
+            hovermode='x unified',
+            dragmode='pan'  # Set default mode to 'pan'
         )
 
         # Display the Plotly chart
         st.plotly_chart(fig, use_container_width=True, config={
-            'scrollZoom': True,
-            'displayModeBar': False
+            'scrollZoom': True,  # Enable scroll to zoom
+            'displayModeBar': True,  # Show the mode bar
+            'displaylogo': False,  # Hide the Plotly logo
+            'modeBarButtonsToRemove': ['toImage']  # Remove the full screen button
         })
 
     # Display dataframe table
