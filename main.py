@@ -98,8 +98,10 @@ st.markdown("""
                 background-color: #232323;
                 color: #FFFFFF;
                 text-align: center;
-                padding: 2px;
+                padding: 2px 0;
                 font-size: 15px;
+                height: 30px;
+                line-height: 30px;
             }
             .footer a {
                 color: #6464ef;
@@ -222,8 +224,11 @@ def stock_info_fragment():
         metric_card("account_balance", market_cap, "Market Cap", icon_color="#6464ef")
         st.write("") # Empty padding
     with col4:
-        # Use currentPrice from stock_info
-        current_price = stock_info.get('currentPrice', 'N/A')
+        # Try to use currentPrice, if not available fallback to navPrice or regularMarketOpen
+        current_price = stock_info.get('currentPrice',
+                        stock_info.get('navPrice',
+                        stock_info.get('regularMarketOpen', 'N/A')))
+        
         if isinstance(current_price, (int, float)):
             current_price = f"${current_price:,.2f}"
         else:
@@ -427,8 +432,10 @@ st.markdown("""
                 background-color: #232323;
                 color: #FFFFFF;
                 text-align: center;
-                padding: 2px;
+                padding: 2px 0;
                 font-size: 15px;
+                height: 30px;
+                line-height: 30px;
             }
             .footer a {
                 color: #6464ef;
