@@ -333,7 +333,7 @@ def stock_info_fragment():
         st.write("") # Empty padding
   
     # Data Visualizations
-    with st.container(height=400, border=True):
+    with st.container(height=420, border=True):
         # Add the 'Number of Posts & Comments' column to the DataFrame
         df["Number of Posts & Comments"] = df["Number of Posts"] + df["Number of Comments"]
         
@@ -368,7 +368,7 @@ def stock_info_fragment():
             legend=dict(
                 orientation="h",
                 yanchor="bottom",
-                y=0.9,
+                y=1.05,
                 xanchor="center",
                 x=0.5,
                 title_text=''
