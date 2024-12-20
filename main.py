@@ -1,16 +1,11 @@
-import psycopg2
 import streamlit as st
 import streamlit.components.v1 as components
-import csv
 import pandas as pd
 import os
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
-from datetime import datetime
-from pytz import timezone
 import duckdb
 import plotly.express as px
-import plotly.graph_objects as go
 from PIL import Image
 import base64
 import io
@@ -212,9 +207,11 @@ def stock_info_fragment():
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         metric_card("list_alt", search_input, "Stock Symbol", icon_color="#6464ef")
+        st.write("") # Empty padding
     with col2:
         stock_name = stock_info.get('longName', 'N/A')
         metric_card("article", stock_name, "Name", icon_color="#6464ef")
+        st.write("") # Empty padding
     with col3:
         # Use totalAssets as a proxy for market cap if marketCap is not provided
         market_cap = stock_info.get('marketCap', stock_info.get('totalAssets', 'N/A'))
@@ -223,15 +220,16 @@ def stock_info_fragment():
         else:
             market_cap = "N/A"
         metric_card("account_balance", market_cap, "Market Cap", icon_color="#6464ef")
+        st.write("") # Empty padding
     with col4:
-        # Use regularMarketPrice or a close approximation from the available data
-        current_price = stock_info.get('regularMarketPrice', stock_info.get('regularMarketOpen', 'N/A'))
+        # Use currentPrice from stock_info
+        current_price = stock_info.get('currentPrice', 'N/A')
         if isinstance(current_price, (int, float)):
             current_price = f"${current_price:,.2f}"
         else:
             current_price = "N/A"
         metric_card("attach_money", current_price, "Current Price", icon_color="#6464ef")
-    st.write("") # Empty padding
+        st.write("") # Empty padding
 
     # TradingView Chart
     components.html(
@@ -299,11 +297,13 @@ def stock_info_fragment():
         # Calculate total posts using df and display in metric card
         total_posts = df["Number of Posts"].sum()
         metric_card("post_add", f"{total_posts:,}", "Total Reddit Posts", icon_color="#6464ef")
+        st.write("") # Empty padding
 
     with col2:
         # Calculate total comments using df and display in metric card
         total_comments = df["Number of Comments"].sum()
         metric_card("comment", f"{total_comments:,}", "Total Reddit Comments", icon_color="#6464ef")
+        st.write("") # Empty padding
 
     with col3:
         # Calculate 7-day average posts using df and display in metric card
@@ -314,6 +314,7 @@ def stock_info_fragment():
             # If less than 7 days of data, take average of available data
             avg_posts_7_days = df["Number of Posts"].mean()
         metric_card("show_chart", f"{avg_posts_7_days:,.2f}", "Weekly Average Posts", icon_color="#6464ef")
+        st.write("") # Empty padding
 
     with col4:
         # Calculate 7-day average comments using df and display in metric card
@@ -324,6 +325,7 @@ def stock_info_fragment():
             # If less than 7 days of data, take average of available data
             avg_comments_7_days = df["Number of Comments"].mean()
         metric_card("stacked_line_chart", f"{avg_comments_7_days:,.2f}", "Weekly Average Comments", icon_color="#6464ef")
+        st.write("") # Empty padding
   
     # Data Visualizations
     with st.container():
