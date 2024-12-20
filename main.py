@@ -98,9 +98,9 @@ st.markdown("""
                 background-color: #232323;
                 color: #FFFFFF;
                 text-align: center;
-                padding: 2px 0;
+                padding: 0px 0;
                 font-size: 15px;
-                height: 30px;
+                height: 35px;
                 line-height: 30px;
             }
             .footer a {
@@ -333,7 +333,7 @@ def stock_info_fragment():
         st.write("") # Empty padding
   
     # Data Visualizations
-    with st.container():
+    with st.container(height=400, border=True):
         # Add the 'Number of Posts & Comments' column to the DataFrame
         df["Number of Posts & Comments"] = df["Number of Posts"] + df["Number of Comments"]
         
@@ -424,9 +424,9 @@ st.markdown("""
                 background-color: #232323;
                 color: #FFFFFF;
                 text-align: center;
-                padding: 2px 0;
+                padding: 0px 0;
                 font-size: 15px;
-                height: 30px;
+                height: 35px;
                 line-height: 30px;
             }
             .footer a {
