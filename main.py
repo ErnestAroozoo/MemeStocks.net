@@ -341,7 +341,7 @@ def stock_info_fragment():
         df_melted = df.melt(id_vars='Date', value_vars=['Number of Posts', 'Number of Comments', 'Number of Posts & Comments'],
                             var_name='Type', value_name='Count')
 
-        # Define custom colors for the gradient effect with more contrast
+        # Define custom colors for the gradient effect
         colors = {
             'Number of Posts': '#1d94d7',
             'Number of Comments': '#6464ef',
@@ -396,15 +396,23 @@ def stock_info_fragment():
             ),
             xaxis_title=None,
             yaxis_title=None,
-            showlegend=True
+            showlegend=True,
+            xaxis=dict(
+                showgrid=False,
+                rangeslider=dict(visible=True),
+                type="date"
+            ),
+            yaxis=dict(
+                showgrid=False
+            ),
+            hovermode='x unified'
         )
 
-        # Remove grid lines
-        fig.update_xaxes(showgrid=False)
-        fig.update_yaxes(showgrid=False)
-
         # Display the Plotly chart
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        st.plotly_chart(fig, use_container_width=True, config={
+            'scrollZoom': True,
+            'displayModeBar': False
+        })
 
     # Display dataframe table
     with st.container(height=500, border=False):
